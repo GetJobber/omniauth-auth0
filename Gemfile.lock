@@ -2,6 +2,7 @@ PATH
   remote: .
   specs:
     omniauth-auth0 (3.1.1)
+      jwt (~> 2)
       omniauth (~> 2)
       omniauth-oauth2 (~> 1)
 
