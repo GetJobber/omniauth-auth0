@@ -1,5 +1,16 @@
 # Change Log
 
+## [v3.2.0](https://github.com/auth0/omniauth-auth0/tree/v3.2.0) (2026-05-12)
+[Full Changelog](https://github.com/auth0/omniauth-auth0/compare/v3.1.1...v3.2.0)
+
+**Added**
+- Add support for client assertion signing key authentication [\#203](https://github.com/auth0/omniauth-auth0/pull/203) ([kaczowkad](https://github.com/kaczowkad))
+
+**Security**
+- Bump faraday from 2.7.10 to 2.14.1 [\#215](https://github.com/auth0/omniauth-auth0/pull/215) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump rack from 2.2.7 to 2.2.23 [\#217](https://github.com/auth0/omniauth-auth0/pull/217) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore: Bump rexml from 3.2.5 to 3.3.9 [\#206](https://github.com/auth0/omniauth-auth0/pull/206) ([arpit-jn](https://github.com/arpit-jn))
+
 ## [v3.2.0](https://github.com/auth0/omniauth-auth0/tree/v3.2.0) (2023-07-14)
 [Full Changelog](https://github.com/auth0/omniauth-auth0/compare/v3.1.0...v3.2.0)
 
