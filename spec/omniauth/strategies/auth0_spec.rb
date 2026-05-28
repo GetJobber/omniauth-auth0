@@ -3,6 +3,7 @@
 require 'spec_helper'
 require 'jwt'
 require 'multi_json'
+require 'cgi'
 
 OmniAuth.config.allowed_request_methods = [:get, :post]
 
