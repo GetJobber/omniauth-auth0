@@ -1,5 +1,10 @@
 # Change Log
 
+## [Unreleased](https://github.com/auth0/omniauth-auth0/tree/HEAD)
+
+**Added**
+- Forward custom query parameters to `/authorize` via the configurable `passthrough_prefixes` option (defaults to `ext-`, set to `[]` to disable). Closes [\#214](https://github.com/auth0/omniauth-auth0/issues/214)
+
 ## [v3.2.0](https://github.com/auth0/omniauth-auth0/tree/v3.2.0) (2026-05-27)
 [Full Changelog](https://github.com/auth0/omniauth-auth0/compare/v3.1.1...v3.2.0)
 

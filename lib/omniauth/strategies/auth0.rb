@@ -17,7 +17,22 @@ module OmniAuth
       AUTHORIZATION_CODE_GRANT_TYPE = 'authorization_code'
       CLIENT_ASSERTION_TYPE = 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer'
 
+      # Auth0 /authorize parameters forwarded from the request when present.
+      PASSTHROUGH_AUTHORIZE_PARAMS = %w[
+        connection
+        connection_scope
+        prompt
+        screen_hint
+        login_hint
+        organization
+        invitation
+        ui_locales
+      ].freeze
+
       option :name, 'auth0'
+
+      # Also forward request parameters whose name starts with one of these prefixes.
+      option :passthrough_prefixes, %w[ext-]
 
       args %i[
         client_id
@@ -90,7 +105,7 @@ module OmniAuth
       def authorize_params
         params = super
 
-        params.merge! request.params.select{|k,b| is_authorized_param?(k)}
+        params.merge!(request.params.select { |key, _value| passthrough_param?(key) })
 
         # Generate nonce
         params[:nonce] = SecureRandom.hex
@@ -128,10 +143,10 @@ module OmniAuth
 
       private
 
-      def is_authorized_param?(param_key)
-        authorized_keys = %w[connection connection_scope prompt screen_hint login_hint organization invitation ui_locales]
-
-        param_key.start_with?("ext-") || authorized_keys.include?(param_key)
+      # Check if a request parameter should be forwarded to /authorize.
+      def passthrough_param?(key)
+        PASSTHROUGH_AUTHORIZE_PARAMS.include?(key) ||
+          Array(options.passthrough_prefixes).any? { |prefix| key.start_with?(prefix) }
       end
 
       def client_assertion_signing_key_auth?

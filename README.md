@@ -122,6 +122,27 @@ end
 
 **Note**: The client_assertion_signing_key must be provided as a PKey object.
 
+### Forwarding query parameters to `/authorize`
+
+The well-known Auth0 `/authorize` parameters (`connection`, `connection_scope`, `prompt`, `screen_hint`, `login_hint`, `organization`, `invitation`, `ui_locales`) are forwarded from the request to the authorization endpoint when present.
+
+Auth0 also supports [custom query parameters](https://auth0.com/docs/customize/login-pages/universal-login/customize-templates#custom-query-parameters) that are surfaced to the Universal Login page and to Actions, as long as they are prefixed with `ext-`. Any request parameter whose name starts with a configured prefix is forwarded as well. This defaults to `ext-`, so a request to `/auth/auth0?ext-promo=summer` forwards `ext-promo=summer` to `/authorize`.
+
+Use the `passthrough_prefixes` option to add prefixes, or set it to `[]` to disable the behavior entirely:
+
+```ruby
+Rails.application.config.middleware.use OmniAuth::Builder do
+  provider(
+    :auth0,
+    AUTH0_CONFIG['auth0_client_id'],
+    AUTH0_CONFIG['auth0_client_secret'],
+    AUTH0_CONFIG['auth0_domain'],
+    # Defaults to %w[ext-]; pass [] to forward no prefixed parameters.
+    passthrough_prefixes: %w[ext-]
+  )
+end
+```
+
 ### Create the callback controller
 
 Create a new controller `./app/controllers/auth0_controller.rb` to handle the callback from Auth0.
