@@ -368,6 +368,48 @@ describe OmniAuth::Strategies::Auth0 do
       it_behaves_like 'oauth redirects with various parameters'
     end
 
+    context 'with a custom passthrough prefix configured' do
+      before do
+        @app = make_application(passthrough_prefixes: %w[custom-])
+      end
+
+      it 'forwards parameters matching the configured prefix' do
+        get 'auth/auth0?custom-foo=bar'
+        redirect_url = last_response.headers['Location']
+        expect(redirect_url).to have_query('custom-foo', 'bar')
+      end
+
+      it 'does not forward the default ext- prefix once overridden' do
+        get 'auth/auth0?ext-test=testval'
+        redirect_url = last_response.headers['Location']
+        expect(redirect_url).not_to have_query('ext-test')
+      end
+
+      it 'still forwards the standard Auth0 parameters' do
+        get 'auth/auth0?connection=abcd'
+        redirect_url = last_response.headers['Location']
+        expect(redirect_url).to have_query('connection', 'abcd')
+      end
+    end
+
+    context 'with passthrough prefixes disabled' do
+      before do
+        @app = make_application(passthrough_prefixes: [])
+      end
+
+      it 'does not forward ext- prefixed parameters' do
+        get 'auth/auth0?ext-test=testval'
+        redirect_url = last_response.headers['Location']
+        expect(redirect_url).not_to have_query('ext-test')
+      end
+
+      it 'still forwards the standard Auth0 parameters' do
+        get 'auth/auth0?connection=abcd'
+        redirect_url = last_response.headers['Location']
+        expect(redirect_url).to have_query('connection', 'abcd')
+      end
+    end
+
     def session
       session_cookie = last_response.cookies['rack.session'].first
       session_data, _, _ = session_cookie.rpartition('--')
