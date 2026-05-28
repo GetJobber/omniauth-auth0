@@ -10,10 +10,6 @@ inputs:
     description: The path to the bundle cache
     required: false
     default: vendor/bundle
-  bundler-cache:
-    description: Whether to use the bundler cache
-    required: false
-    default: true
 
 runs:
   using: composite
@@ -23,10 +19,10 @@ runs:
       uses: ruby/setup-ruby@v1
       with:
         ruby-version: ${{ inputs.ruby }}
-        bundler-cache: ${{ inputs.bundle-cache }}
+        bundler-cache: false
 
     - name: Install dependencies
-      run: bundle check || bundle install
+      run: bundle update || bundle install
       shell: bash
       env:
         BUNDLE_PATH: ${{ inputs.bundle-path }}
