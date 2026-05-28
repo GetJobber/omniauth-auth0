@@ -17,9 +17,7 @@ module OmniAuth
       AUTHORIZATION_CODE_GRANT_TYPE = 'authorization_code'
       CLIENT_ASSERTION_TYPE = 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer'
 
-      # Well-known Auth0 /authorize parameters that are forwarded from the
-      # request to the authorization endpoint when present.
-      # https://auth0.com/docs/api/authentication#login
+      # Auth0 /authorize parameters forwarded from the request when present.
       PASSTHROUGH_AUTHORIZE_PARAMS = %w[
         connection
         connection_scope
@@ -33,10 +31,7 @@ module OmniAuth
 
       option :name, 'auth0'
 
-      # Request parameters whose name starts with one of these prefixes are
-      # also forwarded to /authorize. Auth0 surfaces `ext-` prefixed parameters
-      # to the Universal Login page and Actions. Set to [] to disable.
-      # https://auth0.com/docs/customize/login-pages/universal-login/customize-templates#custom-query-parameters
+      # Also forward request parameters whose name starts with one of these prefixes.
       option :passthrough_prefixes, %w[ext-]
 
       args %i[
@@ -148,6 +143,7 @@ module OmniAuth
 
       private
 
+      # Check if a request parameter should be forwarded to /authorize.
       def passthrough_param?(key)
         PASSTHROUGH_AUTHORIZE_PARAMS.include?(key) ||
           Array(options.passthrough_prefixes).any? { |prefix| key.start_with?(prefix) }
