@@ -1,16 +1,13 @@
-name: Publish Release
+name: Create Release
 
 on:
+  pull_request:
+    types:
+      - closed
   workflow_dispatch:
-    inputs:
-      branch:
-        description: The branch to release from.
-        required: true
-        default: master
-
 
 permissions:
-  contents: read
+  contents: write
   id-token: write # This is required for requesting the JWT
 
 jobs:
@@ -26,7 +23,7 @@ jobs:
       PRODSEC_TOOLS_TOKEN: ${{ secrets.PRODSEC_TOOLS_TOKEN }}
       PRODSEC_TOOLS_ARN: ${{ secrets.PRODSEC_TOOLS_ARN }}
 
-  publish:
+  release:
     uses: ./.github/workflows/ruby-release.yml
     needs: rl-scanner
     with:
