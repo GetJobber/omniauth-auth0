@@ -19,7 +19,7 @@ group :test do
   gem 'listen', '~> 3'
   gem 'rack-test', '~> 2', '>= 2.0.2'
   gem 'rspec', '~> 3'
-  gem 'simplecov-cobertura', '~> 2'
+  gem 'simplecov-cobertura', '~> 3.0'
   gem 'webmock', '~> 3'
   gem 'multi_json', '~> 1'
 end
