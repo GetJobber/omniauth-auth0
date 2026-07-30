@@ -2,7 +2,7 @@ source 'https://rubygems.org'
 
 gemspec
 
-gem 'jwt', '~> 2'
+gem 'jwt', '>= 2', '< 4'
 gem 'rake', '~> 13'
 
 group :development do

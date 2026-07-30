@@ -618,7 +618,12 @@ describe OmniAuth::Auth0::JWTValidator do
         iat: past_timecode,
         aud: client_id
       }
-      token = make_rs256_token(payload) + 'bad'
+      # Swap in a signature from a different payload so the segment stays
+      # valid base64 (JWT 3.x raises Base64DecodeError before verifying
+      # otherwise) but no longer matches the token.
+      header_segment, payload_segment, _signature = make_rs256_token(payload).split('.')
+      other_signature = make_rs256_token(payload.merge(sub: 'other')).split('.').last
+      token = [header_segment, payload_segment, other_signature].join('.')
       expect do
         verified_token = make_jwt_validator(opt_domain: domain).verify(token)
       end.to raise_error(an_instance_of(JWT::VerificationError).and having_attributes({
