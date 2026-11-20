@@ -190,6 +190,20 @@ RSpec.shared_examples 'oauth redirects with various parameters' do
     get '/auth/auth0'
     expect(session['authorize_params'].class).to eq(::Hash)
   end
+
+  it 'stores the authorize params the callback verifies with each sign-in' do
+    get '/auth/auth0'
+    first = session
+    get '/auth/auth0'
+    second = session
+
+    sign_ins = second['omniauth.oauth2']
+    expect(sign_ins.keys).to eq([first['omniauth.state'], second['omniauth.state']])
+    expect(sign_ins[first['omniauth.state']]['authorize_params'])
+      .to eq('nonce' => first['authorize_params']['nonce'], 'leeway' => 60)
+    expect(sign_ins[second['omniauth.state']]['authorize_params'])
+      .to eq('nonce' => second['authorize_params']['nonce'], 'leeway' => 60)
+  end
 end
 
 RSpec.shared_examples 'basic oauth callback assertions' do
@@ -509,6 +523,30 @@ describe OmniAuth::Strategies::Auth0 do
 
           it 'fails when the ID token has another nonce' do
             finish_sign_in(start_sign_in, nonce: 'another nonce')
+            expect(last_response.status).to eq(302)
+            expect(last_response.headers['Location']).to fail_auth_with('token_validation_error')
+          end
+
+          it 'verifies an earlier sign-in against its own nonce' do
+            first = start_sign_in
+            start_sign_in
+            finish_sign_in(first)
+            expect(last_response.status).to eq(200)
+            expect(subject['uid']).to eq(user_id)
+          end
+
+          it 'fails an earlier sign-in whose ID token has the latest nonce' do
+            first = start_sign_in
+            latest = start_sign_in
+            finish_sign_in(first, nonce: latest['authorize_params']['nonce'])
+            expect(last_response.status).to eq(302)
+            expect(last_response.headers['Location']).to fail_auth_with('token_validation_error')
+          end
+
+          it 'verifies a sign-in without stored params against the session authorize_params' do
+            sign_in = { 'omniauth.state' => state, 'authorize_params' => { 'scope' => 'openid', 'nonce' => 'nonce' } }
+            env 'rack.session', sign_in
+            finish_sign_in(sign_in, nonce: 'another nonce')
             expect(last_response.status).to eq(302)
             expect(last_response.headers['Location']).to fail_auth_with('token_validation_error')
           end
