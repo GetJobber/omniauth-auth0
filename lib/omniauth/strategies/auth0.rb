@@ -17,6 +17,10 @@ module OmniAuth
       AUTHORIZATION_CODE_GRANT_TYPE = 'authorization_code'
       CLIENT_ASSERTION_TYPE = 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer'
 
+      # The authorize params the callback verifies the ID token against. Each
+      # sign-in stores only these, since the session may be a 4 KB cookie.
+      VERIFIED_AUTHORIZE_PARAMS = %w[scope nonce leeway max_age organization].freeze
+
       option :name, 'auth0'
 
       args %i[
@@ -56,8 +60,7 @@ module OmniAuth
         end
 
         # Retrieve and remove authorization params from the session
-        session_authorize_params = session['authorize_params'] || {}
-        session.delete('authorize_params')
+        session_authorize_params = stored_authorize_params
 
         auth_scope = session_authorize_params[:scope]
         if auth_scope.respond_to?(:include?) && auth_scope.include?('openid')
@@ -99,6 +102,7 @@ module OmniAuth
 
         # Store authorize params in the session for token verification
         session['authorize_params'] = params.to_hash
+        store_sign_in_authorize_params(params)
 
         params
       end
@@ -127,6 +131,32 @@ module OmniAuth
       end
 
       private
+
+      # Adds the authorize params the callback verifies to the sign-in that
+      # omniauth-oauth2 stores for this state, so several sign-ins can be in
+      # progress at once, for example in several tabs. Each callback then
+      # verifies its ID token against its own nonce, not the latest
+      # sign-in's.
+      def store_sign_in_authorize_params(params)
+        state = params[:state].to_s
+        sign_ins = session['omniauth.oauth2']
+        sign_in = sign_ins[state] if sign_ins.is_a?(Hash)
+        return unless sign_in.is_a?(Hash)
+
+        verified = params.to_hash.slice(*VERIFIED_AUTHORIZE_PARAMS)
+        session['omniauth.oauth2'] = sign_ins.merge(state => sign_in.merge('authorize_params' => verified))
+      end
+
+      # The authorize params the request phase stored for this callback's
+      # sign-in, removed from the session. Without a stored sign-in for its
+      # state, they come from session['authorize_params'], which holds the
+      # latest sign-in's. The callback reads them by symbol, and a session
+      # store can return them with string keys, so their keys are symbolized.
+      def stored_authorize_params
+        latest = session.delete('authorize_params')
+        params = stored_sign_in['authorize_params'] || latest || {}
+        params.to_h.transform_keys(&:to_sym)
+      end
 
       def is_authorized_param?(param_key)
         authorized_keys = %w[connection connection_scope prompt screen_hint login_hint organization invitation ui_locales]

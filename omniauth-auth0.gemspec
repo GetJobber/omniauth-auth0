@@ -23,7 +23,7 @@ omniauth-auth0 is the OmniAuth strategy for Auth0.
 
   s.add_runtime_dependency 'jwt', '>= 2', '< 4'
   s.add_runtime_dependency 'omniauth', '~> 2'
-  s.add_runtime_dependency 'omniauth-oauth2', '~> 1'
+  s.add_runtime_dependency 'omniauth-oauth2', '~> 1.10'
 
   s.add_development_dependency 'bundler'
 
