@@ -56,8 +56,7 @@ module OmniAuth
         end
 
         # Retrieve and remove authorization params from the session
-        session_authorize_params = session['authorize_params'] || {}
-        session.delete('authorize_params')
+        session_authorize_params = stored_authorize_params
 
         auth_scope = session_authorize_params[:scope]
         if auth_scope.respond_to?(:include?) && auth_scope.include?('openid')
@@ -127,6 +126,13 @@ module OmniAuth
       end
 
       private
+
+      # The authorize params the request phase stored, removed from the
+      # session. The callback reads them by symbol, and a session store can
+      # return them with string keys, so their keys are symbolized.
+      def stored_authorize_params
+        (session.delete('authorize_params') || {}).to_h.transform_keys(&:to_sym)
+      end
 
       def is_authorized_param?(param_key)
         authorized_keys = %w[connection connection_scope prompt screen_hint login_hint organization invitation ui_locales]

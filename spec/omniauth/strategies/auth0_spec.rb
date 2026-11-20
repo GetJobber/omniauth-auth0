@@ -482,6 +482,37 @@ describe OmniAuth::Strategies::Auth0 do
 
           it_behaves_like 'oidc callback assertions'
         end
+
+        context 'oidc after the request phase' do
+          before do
+            @app = make_application(authorize_params: { scope: 'openid' })
+          end
+
+          def start_sign_in
+            get '/auth/auth0'
+            session
+          end
+
+          def finish_sign_in(sign_in, nonce: sign_in['authorize_params']['nonce'])
+            now = Time.now.to_i
+            payload = { 'sub' => user_id, 'iss' => "#{domain_url}/", 'aud' => client_id,
+                        'exp' => now + 600, 'iat' => now, 'nonce' => nonce }
+            stub_auth(oidc_response.merge(id_token: JWT.encode(payload, client_secret, 'HS256')))
+            get '/auth/auth0/callback', 'state' => sign_in['omniauth.state'], 'code' => 'code'
+          end
+
+          it 'succeeds when the ID token has the nonce of the sign-in' do
+            finish_sign_in(start_sign_in)
+            expect(last_response.status).to eq(200)
+            expect(subject['uid']).to eq(user_id)
+          end
+
+          it 'fails when the ID token has another nonce' do
+            finish_sign_in(start_sign_in, nonce: 'another nonce')
+            expect(last_response.status).to eq(302)
+            expect(last_response.headers['Location']).to fail_auth_with('token_validation_error')
+          end
+        end
       end
 
       context 'when using client assertion signing key authentication' do
