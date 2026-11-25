@@ -1,7 +1,7 @@
 $LOAD_PATH.unshift File.expand_path(__dir__)
 $LOAD_PATH.unshift File.expand_path('../lib', __dir__)
 
-require 'multi_json'
+require 'json'
 require 'simplecov'
 SimpleCov.start
 
@@ -51,7 +51,7 @@ RSpec.configure do |config|
       end
 
       get '/auth/auth0/callback' do
-        MultiJson.encode(env['omniauth.auth'])
+        JSON.generate(env['omniauth.auth'])
       end
     end
   end

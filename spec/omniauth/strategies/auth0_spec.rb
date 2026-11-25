@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 require 'jwt'
-require 'multi_json'
+require 'json'
 require 'cgi'
 
 OmniAuth.config.allowed_request_methods = [:get, :post]
@@ -427,7 +427,7 @@ describe OmniAuth::Strategies::Auth0 do
         stub_request(:get, 'https://samples.auth0.com/userinfo')
           .to_return(
             headers: { 'Content-Type' => 'application/json' },
-            body: MultiJson.encode(body)
+            body: JSON.generate(body)
           )
       end
 
@@ -441,7 +441,7 @@ describe OmniAuth::Strategies::Auth0 do
       end
 
       let(:subject) do
-        MultiJson.decode(last_response.body)
+        JSON.parse(last_response.body)
       end
 
       context 'when using client_secret authentication' do
@@ -464,7 +464,7 @@ describe OmniAuth::Strategies::Auth0 do
             .with(headers: { 'Auth0-Client' => telemetry_value })
             .to_return(
               headers: { 'Content-Type' => 'application/json' },
-              body: MultiJson.encode(body)
+              body: JSON.generate(body)
             )
         end
 
@@ -632,7 +632,7 @@ describe OmniAuth::Strategies::Auth0 do
             end
             .to_return(
               headers: { 'Content-Type' => 'application/json' },
-              body: MultiJson.encode(body)
+              body: JSON.generate(body)
             )
         end
 
