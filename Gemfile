@@ -21,5 +21,4 @@ group :test do
   gem 'rspec', '~> 3'
   gem 'simplecov-cobertura', '~> 3.0'
   gem 'webmock', '~> 3'
-  gem 'multi_json', '~> 1'
 end
